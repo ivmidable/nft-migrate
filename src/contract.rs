@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::Empty;
+use cosmwasm_std::{Empty, StdError};
 use cw2::set_contract_version;
 pub use cw721_base::{ContractError, InstantiateMsg, MintMsg, MinterResponse};
 
@@ -71,6 +71,23 @@ pub mod entry {
     #[entry_point]
     pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         Cw721MetadataContract::default().query(deps, env, msg)
+    }
+
+    #[entry_point]
+    pub fn migrate(deps: DepsMut, _env: Env, _msg: Empty) -> Result<Response, ContractError> {
+        let ver = cw2::get_contract_version(deps.storage)?;
+
+        if ver.contract != CONTRACT_NAME {
+            return Err(StdError::generic_err("Can only upgrade from same type").into());
+        }
+
+        if ver.version >= CONTRACT_VERSION.to_string() {
+            return Err(StdError::generic_err("Cannot upgrade from a newer version").into());
+        }
+
+        // set the new version
+        cw2::set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+        Ok(Response::default())
     }
 }
 

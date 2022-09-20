@@ -48,29 +48,41 @@ describe("Cosmwasm Template Tests", () => {
     xit("Upload NFT to testnet twice", async () => {
         //upload NFT contract to testnet twice and get two code_id's
         let client = await setupClient();
-
+        let res = await client.upload(sender, nft_wasm, "auto", undefined);
+        console.log(res);
     }).timeout(100000);
 
     xit("Instantiate NFT on testnet", async () => {
         //instantiate a NFT contract on the testnet with one of the code_id's
         //get the contract address after instantiation.
         //make sure you supply a admin address.
-        let code_id = 0;
+        let code_id = 3582; //3583
         let client = await setupClient();
-
+        let res = await client.instantiate(sender, code_id, {name:"TestNFT", symbol:"NFT", minter:sender}, "NFT", "auto", {admin:sender});
+        console.log(res);
     }).timeout(100000);
 
     xit("Mint on testnet", async () => {
         //using contract address mint a NFT on the testnet.
         let client = await setupClient();
-
+        let res = await client.execute(sender, "juno1zt9m45jy2ja20kes85ulet74lyawed48m8447adqew39mvquwemqeghshs", {mint:{token_id:"0", token_uri:"url", owner:sender }}, "auto");
+        console.log(res);
     }).timeout(100000);
 
     xit("Migrate NFT contract on testnet", async () => {
         //using the contract address migrate the NFT contract to the second code_id
         //then verify the minted NFT still exists.
         let client = await setupClient();
+        let res = await client.migrate(sender, "juno1zt9m45jy2ja20kes85ulet74lyawed48m8447adqew39mvquwemqeghshs", 3591, {}, "auto");
+        console.log(res);
+    }).timeout(100000);
 
+    xit("Check to see if NFT exists", async() => {
+        let client = await setupClient();
+        let res = await client.queryContractSmart("juno1zt9m45jy2ja20kes85ulet74lyawed48m8447adqew39mvquwemqeghshs", {all_tokens:{}});
+        console.log(res);
+        res = await client.queryContractSmart("juno1zt9m45jy2ja20kes85ulet74lyawed48m8447adqew39mvquwemqeghshs", {owner_of:{token_id:"0"}});
+        console.log(res);
     }).timeout(100000);
 
 });
